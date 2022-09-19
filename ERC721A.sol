@@ -13,10 +13,13 @@ contract Testing is ERC721A, Ownable {
     string _baseTokenURI;
     mapping(address => uint256) public owner;
     bool URISetter;
+    string URI1;
 
-    constructor() ERC721A("Testing", "TEST") {
+    constructor(string memory baseURI) ERC721A("Testing", "TEST") {
         maxSupply=20;
         URISetter = false;
+        setBaseURI(baseURI);
+        URI1 = "ipfs://Qmdp7fTb7f1gTEYe6JkC22h4jScuwqxMgpAFFpeUmrk8Tq/";
     }
 
     function mint(uint256 quantity) external payable {
@@ -29,27 +32,34 @@ contract Testing is ERC721A, Ownable {
 
     }
 
-    function setBaseURI(string memory baseURI) external onlyOwner {
+    function setBaseURI(string memory baseURI) public onlyOwner {
             _baseTokenURI = baseURI;
             URISetter = true;
         }
 
-
-        function _baseURI() internal view virtual override returns (string memory) {
-        return _baseTokenURI;
+    function _baseURI() internal view virtual override returns (string memory) { 
+    return _baseTokenURI;
     }
 
-    function _startTokenId() internal view virtual override returns (uint256) {
+   function _startTokenId() internal view virtual override returns (uint256) {
         return 1;
     }
 
-    function tokenURI(uint256 tokenId) public view override returns (string memory){
+      function tokenURI(uint256 tokenId) public view override returns (string memory){
         require( _exists(tokenId), "ERC721Metadata: URI query for nonexistent token" );
+        require(URISetter==true,"URI has not been set");
+      
+        if (block.timestamp % 2 == 0) {
+            return bytes(URI1).length > 0 ? string(
+            abi.encodePacked(URI1,Strings.toString(tokenId),".json"))
+            : "";
+        }else{
         string memory currentBaseURI = _baseURI();
         return
             bytes(currentBaseURI).length > 0 ? string(
             abi.encodePacked(currentBaseURI,Strings.toString(tokenId),".json"))
-                : "";
+            : "";
+        }
     }
 
 
